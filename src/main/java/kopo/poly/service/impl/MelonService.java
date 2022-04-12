@@ -314,4 +314,60 @@ public class MelonService implements IMelonService {
 
         return res;
     }
+
+    @Override
+    public int updateManySong() throws Exception {
+
+        //로그 찍기 (추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이함.)
+        log.info(this.getClass().getName() + ".updateManySong Start!");
+
+        int res = 0;
+
+        //수정할 컬렌션
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        //기존 수집된 멜론 Top100 수집한 컬렉션 삭제하기
+        melonMapper.dropMelonCollection(colNm);
+
+        //멜론 top100 수집하기
+        if (this.collectMelonSong() == 1) {
+
+            String singer = "방탄소년단"; //수정할 가수 이름
+            String updateSinger = "BTS"; // 변경될 가수이름
+            String updateSong = "BTS-SONG"; //변경될 노래 제목
+
+            res = melonMapper.updateManySong(colNm, singer, updateSinger, updateSong);
+        }
+
+        // 로그 찍기 (추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
+        log.info(this.getClass().getName() + ".updateManySong End!");
+
+
+        return res;
+    }
+
+    @Override
+    public int deleteSong() throws Exception {
+
+        //로그 찍기 (추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이함.)
+        log.info(this.getClass().getName() + ".deleteSong Start!");
+
+        int res = 0;
+
+        //삭제할 컬렉션
+        String colNm = "MELON_" + DateUtil.getDateTime("yyyyMMdd");
+
+        // 수집된 데이터로부터 삭제할 가수명
+        String singer = "방탄소년단";
+
+        // MongoDB에 데이터저장하기
+        res = melonMapper.deleteSong(colNm, singer);
+
+
+        // 로그 찍기 (추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
+        log.info(this.getClass().getName() + ".deleteSong End!");
+
+
+        return res;
+    }
 }
