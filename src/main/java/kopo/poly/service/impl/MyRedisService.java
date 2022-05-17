@@ -288,4 +288,84 @@ public class MyRedisService implements IMyRedisService {
 
         return res;
     }
+
+    @Override
+    public Set<RedisDTO> getRedisSetJSONRamda() throws Exception {
+
+        log.info(this.getClass().getName() + ".getRedisSetJSONRamda Start!");
+
+        String redisKey = "myRedis_Set_JSON";
+
+        Set<RedisDTO> rSet = myRedisMapper.getRedisSetJSONRamda(redisKey);
+
+        if (rSet == null) {
+            rSet = new HashSet<>();
+
+        }
+
+        log.info(this.getClass().getName() + ".getRedisSetJSONRamda End!");
+
+        return rSet;
+    }
+
+    @Override
+    public int saveRedisZSetJSON() throws Exception {
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON Start!");
+
+        String redisKey = "myRedis_Zset_JSON";
+
+        List<RedisDTO> pList = new LinkedList<>();
+
+        for (int i = 0; i < 10; i++) {
+
+            RedisDTO pDTO = new RedisDTO();
+            pDTO.setTest_text(i + "번째 데이터입니다.");
+            pDTO.setName("양준호[" + i + "]");
+            pDTO.setAddr("서울");
+            pDTO.setEmail("2120110019@kopo.ac.kr");
+
+            pList.add(pDTO);
+            pDTO = null;
+        }
+
+        int res = myRedisMapper.saveRedisZSetJSON(redisKey, pList);
+
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON End!");
+
+        return res;
+    }
+
+    @Override
+    public Set<RedisDTO> getRedisZSetJSON() throws Exception {
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON Start!");
+
+        String redisKey = "myRedis_Zset_JSON";
+
+        Set<RedisDTO> rSet = myRedisMapper.getRedisZSetJSON(redisKey);
+
+        if (rSet == null) {
+            rSet = new HashSet<>();
+
+        }
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON End!");
+
+        return rSet;
+    }
+
+    @Override
+    public boolean deleteDataJSON() throws Exception {
+
+        log.info(this.getClass().getName() + ".deleteData Start!");
+
+        String redisKey = "myRedis_Zset_JSON";
+
+        boolean res = myRedisMapper.deleteDataJson(redisKey);
+
+        log.info(this.getClass().getName() + ".deleteData End!");
+
+        return res;
+    }
+
 }

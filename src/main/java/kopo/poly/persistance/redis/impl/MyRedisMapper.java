@@ -367,4 +367,106 @@ public class MyRedisMapper implements IMyRedisMapper {
 
         return res;
     }
+
+    @Override
+    public Set<RedisDTO> getRedisSetJSONRamda(String redisKey) throws Exception {
+
+        log.info(this.getClass().getName() + ".getRedisSetJSONRamda Start!");
+
+        // 결과값 전달할 객체
+        Set<RedisDTO> rSet = null;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer()); // String 타입
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        if (redisDB.hasKey(redisKey)) {
+            rSet = (Set) redisDB.opsForSet().members(redisKey);
+
+        }
+
+        log.info(this.getClass().getName() + ".getRedisSetJSONRamda End!");
+
+        return rSet;
+    }
+
+    @Override
+    public int saveRedisZSetJSON(String redisKey, List<RedisDTO> pList) throws Exception {
+
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON Start!");
+
+        int res = 0;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer()); // String 타입
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        int idx = 0;
+
+        for (RedisDTO dto : pList) {
+            redisDB.opsForZSet().add(redisKey, dto, ++idx);
+
+        }
+
+        // 저장되는 데이터의 유효기간(TTL)은 5시간으로 정의
+        redisDB.expire(redisKey, 5, TimeUnit.HOURS);
+
+        res = 1;
+
+        log.info(this.getClass().getName() + ".saveRedisZSetJSON End!");
+
+        return res;
+    }
+
+    @Override
+    public Set<RedisDTO> getRedisZSetJSON(String redisKey) throws Exception {
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON Start!");
+
+        // 결과값 전달할 객체
+        Set<RedisDTO> rSet = null;
+
+        // redisDB의 키의 데이터 타입을 String으로 정의(항상 String으로 설정함)
+        redisDB.setKeySerializer(new StringRedisSerializer()); // String 타입
+
+        // RedisDTO에 저장된 데이터를 자동으로 JSON으로 변경하기
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        if (redisDB.hasKey(redisKey)) {
+
+            // 저장된 전체 레코드 수
+            long cnt = redisDB.opsForZSet().size(redisKey);
+
+            rSet = (Set) redisDB.opsForZSet().range(redisKey, 0, cnt);
+
+        }
+
+        log.info(this.getClass().getName() + ".getRedisZSetJSON End!");
+
+        return rSet;
+    }
+
+    @Override
+    public boolean deleteDataJson(String redisKey) throws Exception {
+
+        log.info(this.getClass().getName() + ".deleteDataJSON Start!");
+
+        // 저장되었던 데이터 타입 정의
+        redisDB.setKeySerializer(new StringRedisSerializer()); // String 타입
+        redisDB.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisDTO.class));
+
+        boolean res = false;
+
+        if(redisDB.hasKey(redisKey)) {
+            redisDB.delete(redisKey);
+            res = true;
+        }
+        log.info(this.getClass().getName() + ".deleteDataJSON End!");
+
+        return res;
+    }
 }
