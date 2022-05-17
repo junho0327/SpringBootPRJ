@@ -142,4 +142,12 @@ public interface IMyRedisMapper {
      * @return 결과 값
      */
     boolean deleteDataJson(String redisKey) throws Exception;
+
+    /**
+     * Redis에 String 구조로 저장된 데이터 삭제하기
+     *
+     * @param redisKey 삭제할 RedisKey
+     * @return 결과 값
+     */
+    boolean deleteDataString(String redisKey) throws Exception;
 }

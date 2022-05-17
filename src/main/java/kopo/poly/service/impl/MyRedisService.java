@@ -368,4 +368,17 @@ public class MyRedisService implements IMyRedisService {
         return res;
     }
 
+    @Override
+    public boolean deleteDataString() throws Exception {
+
+        log.info(this.getClass().getName() + ".deleteData Start!");
+
+        String redisKey = "myRedis_Hash";
+
+        boolean res = myRedisMapper.deleteDataJson(redisKey);
+
+        log.info(this.getClass().getName() + ".deleteData End!");
+
+        return res;
+    }
 }

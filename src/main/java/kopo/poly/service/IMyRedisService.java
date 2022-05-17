@@ -94,4 +94,9 @@ public interface IMyRedisService {
      * Redis에 JSON 구조로 저장된 데이터 삭제하기
      */
     boolean deleteDataJSON() throws Exception;
+
+    /**
+     * Redis에 String 구조로 저장된 데이터 삭제하기
+     */
+    boolean deleteDataString() throws Exception;
 }
