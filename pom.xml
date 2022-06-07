@@ -11,6 +11,7 @@
     <groupId>kopo</groupId>
     <artifactId>poly</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
     <name>SpringBootPRJ</name>
     <description>SpringBootPRJ</description>
     <properties>
@@ -76,19 +77,6 @@
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
             <version>10.0.16</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.12.10</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-jdbc</artifactId>
-            <version>1.0.3</version>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>
