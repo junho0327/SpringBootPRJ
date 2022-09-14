@@ -362,11 +362,6 @@ public class MelonService implements IMelonService {
 
     }
 
-    @Override
-    public int deleteSong() throws Exception {
-        return 0;
-    }
-
 
     @Override
     public int deleteBTSSong() throws Exception {

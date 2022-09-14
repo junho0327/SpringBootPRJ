@@ -129,7 +129,7 @@
         logMessage('Speech recognized: %c' + commandText, debugStyle);
       }
 
-      // try and match the recognized text to one of the commands on the list
+      // try and match recognized text to one of the commands on the list
       for (let j = 0, l = commandsList.length; j < l; j++) {
         var currentCommand = commandsList[j];
         var result = currentCommand.command.exec(commandText);
@@ -161,53 +161,129 @@
 
   annyang = {
     /**
-     * Add commands that annyang will respond to. Similar in syntax to init(), but doesn't remove existing commands.
+     * Initialize annyang with a list of commands to recognize.
      *
      * #### Examples:
      * ````javascript
-     * const commands = {'hello :name': helloFunction, 'howdy': helloFunction};
-     * const commands2 = {'hi': helloFunction};
+     * var commands = {'hello :name': helloFunction};
+     * var commands2 = {'hi': helloFunction};
      *
-     * annyang.addCommands(commands);
-     * annyang.addCommands(commands2);
-     * // annyang will now listen for all three commands
+     * // initialize annyang, overwriting any previously added commands
+     * annyang.init(commands, true);
+     * // adds an additional command without removing the previous commands
+     * annyang.init(commands2, false);
      * ````
+     * As of v1.1.0 it is no longer required to call init(). Just start() listening whenever you want, and addCommands() whenever, and as often as you like.
      *
-     * @param {Object} commands - Commands that annyang should listen for
-     * @method addCommands
+     * @param {Object} commands - Commands that annyang should listen to
+     * @param {boolean} [resetCommands=true] - Remove all commands before initializing?
+     * @method init
+     * @deprecated
      * @see [Commands Object](#commands-object)
      */
-    addCommands: function(commands) {
-      var cb;
+    init: function(commands, resetCommands = true) {
+      // Abort previous instances of recognition already running
+      if (recognition && recognition.abort) {
+        recognition.abort();
+      }
 
-      initIfNeeded();
+      // initiate SpeechRecognition
+      recognition = new SpeechRecognition();
 
-      for (let phrase in commands) {
-        if (commands.hasOwnProperty(phrase)) {
-          cb = root[commands[phrase]] || commands[phrase];
-          if (typeof cb === 'function') {
-            // convert command to regex then register the command
-            registerCommand(commandToRegExp(phrase), cb, phrase);
-          } else if (typeof cb === 'object' && cb.regexp instanceof RegExp) {
-            // register the command
-            registerCommand(
-              new RegExp(cb.regexp.source, 'i'),
-              cb.callback,
-              phrase
-            );
-          } else {
-            if (debugState) {
-              logMessage('Can not register command: %c' + phrase, debugStyle);
+      // Set the max number of alternative transcripts to try and match with a command
+      recognition.maxAlternatives = 5;
+
+      // In HTTPS, turn off continuous mode for faster results.
+      // In HTTP,  turn on  continuous mode for much slower results, but no repeating security notices
+      recognition.continuous = root.location.protocol === 'http:';
+
+      // Sets the language to the default 'en-US'. This can be changed with annyang.setLanguage()
+      recognition.lang = 'ko';
+
+      recognition.onstart = function() {
+        isListening = true;
+        invokeCallbacks(callbacks.start);
+      };
+
+      recognition.onsoundstart = function() {
+        invokeCallbacks(callbacks.soundstart);
+      };
+
+      recognition.onerror = function(event) {
+        invokeCallbacks(callbacks.error, event);
+        switch (event.error) {
+          case 'network':
+            invokeCallbacks(callbacks.errorNetwork, event);
+            break;
+          case 'not-allowed':
+          case 'service-not-allowed':
+            // if permission to use the mic is denied, turn off auto-restart
+            autoRestart = false;
+            // determine if permission was denied by user or automatically.
+            if (new Date().getTime() - lastStartedAt < 200) {
+              invokeCallbacks(callbacks.errorPermissionBlocked, event);
+            } else {
+              invokeCallbacks(callbacks.errorPermissionDenied, event);
             }
-            continue;
+            break;
+        }
+      };
+
+      recognition.onend = function() {
+        isListening = false;
+        invokeCallbacks(callbacks.end);
+        // annyang will auto restart if it is closed automatically and not by user action.
+        if (autoRestart) {
+          // play nicely with the browser, and never restart annyang automatically more than once per second
+          var timeSinceLastStart = new Date().getTime() - lastStartedAt;
+          autoRestartCount += 1;
+          if (autoRestartCount % 10 === 0) {
+            if (debugState) {
+              logMessage(
+                'Speech Recognition is repeatedly stopping and starting. See http://is.gd/annyang_restarts for tips.'
+              );
+            }
+          }
+          if (timeSinceLastStart < 1000) {
+            setTimeout(function() {
+              annyang.start({ paused: pauseListening });
+            }, 1000 - timeSinceLastStart);
+          } else {
+            annyang.start({ paused: pauseListening });
           }
         }
+      };
+
+      recognition.onresult = function(event) {
+        if (pauseListening) {
+          if (debugState) {
+            logMessage('Speech heard, but annyang is paused');
+          }
+          return false;
+        }
+
+        // Map the results to an array
+        var SpeechRecognitionResult = event.results[event.resultIndex];
+        var results = [];
+        for (let k = 0; k < SpeechRecognitionResult.length; k++) {
+          results[k] = SpeechRecognitionResult[k].transcript;
+        }
+
+        parseResults(results);
+      };
+
+      // build commands list
+      if (resetCommands) {
+        commandsList = [];
+      }
+      if (commands.length) {
+        this.addCommands(commands);
       }
     },
 
     /**
      * Start listening.
-     * It's a good idea to call this after adding some commands first (but not mandatory)
+     * It's a good idea to call this after adding some commands first, but not mandatory.
      *
      * Receives an optional options object which supports the following options:
      *
@@ -281,7 +357,7 @@
     },
 
     /**
-     * Resumes listening and restore command callback execution when a command is matched.
+     * Resumes listening and restore command callback execution when a result matches.
      * If SpeechRecognition was aborted (stopped), start it.
      *
      * @method resume
@@ -313,11 +389,56 @@
     },
 
     /**
+     * Add commands that annyang will respond to. Similar in syntax to init(), but doesn't remove existing commands.
+     *
+     * #### Examples:
+     * ````javascript
+     * var commands = {'hello :name': helloFunction, 'howdy': helloFunction};
+     * var commands2 = {'hi': helloFunction};
+     *
+     * annyang.addCommands(commands);
+     * annyang.addCommands(commands2);
+     * // annyang will now listen to all three commands
+     * ````
+     *
+     * @param {Object} commands - Commands that annyang should listen to
+     * @method addCommands
+     * @see [Commands Object](#commands-object)
+     */
+    addCommands: function(commands) {
+      var cb;
+
+      initIfNeeded();
+
+      for (let phrase in commands) {
+        if (commands.hasOwnProperty(phrase)) {
+          cb = root[commands[phrase]] || commands[phrase];
+          if (typeof cb === 'function') {
+            // convert command to regex then register the command
+            registerCommand(commandToRegExp(phrase), cb, phrase);
+          } else if (typeof cb === 'object' && cb.regexp instanceof RegExp) {
+            // register the command
+            registerCommand(
+              new RegExp(cb.regexp.source, 'i'),
+              cb.callback,
+              phrase
+            );
+          } else {
+            if (debugState) {
+              logMessage('Can not register command: %c' + phrase, debugStyle);
+            }
+            continue;
+          }
+        }
+      }
+    },
+
+    /**
      * Remove existing commands. Called with a single phrase, an array of phrases, or methodically. Pass no params to remove all commands.
      *
      * #### Examples:
      * ````javascript
-     * const commands = {'hello': helloFunction, 'howdy': helloFunction, 'hi': helloFunction};
+     * var commands = {'hello': helloFunction, 'howdy': helloFunction, 'hi': helloFunction};
      *
      * // Remove all existing commands
      * annyang.removeCommands();
@@ -533,127 +654,6 @@
 
       parseResults(sentences);
     },
-
-    /**
-     * Initialize annyang with a list of commands to recognize.
-     *
-     * #### Examples:
-     * ````javascript
-     * const commands = {'hello :name': helloFunction};
-     * const commands2 = {'hi': helloFunction};
-     *
-     * // initialize annyang, overwriting any previously added commands
-     * annyang.init(commands, true);
-     * // adds an additional command without removing the previous commands
-     * annyang.init(commands2, false);
-     * ````
-     * As of v1.1.0 it is no longer required to call init(). Just start() listening whenever you want, and addCommands() whenever, and as often as you like.
-     *
-     * @param {Object} commands - Commands that annyang should listen to
-     * @param {boolean} [resetCommands=true] - Remove all commands before initializing?
-     * @method init
-     * @deprecated
-     * @see [Commands Object](#commands-object)
-     */
-    init: function(commands, resetCommands = true) {
-      // Abort previous instances of recognition already running
-      if (recognition && recognition.abort) {
-        recognition.abort();
-      }
-
-      // initiate SpeechRecognition
-      recognition = new SpeechRecognition();
-
-      // Set the max number of alternative transcripts to try and match with a command
-      recognition.maxAlternatives = 5;
-
-      // In HTTPS, turn off continuous mode for faster results.
-      // In HTTP,  turn on  continuous mode for much slower results, but no repeating security notices
-      recognition.continuous = root.location.protocol === 'http:';
-
-      // Sets the language to the default 'en-US'. This can be changed with annyang.setLanguage()
-      recognition.lang = 'ko';
-
-      recognition.onstart = function() {
-        isListening = true;
-        invokeCallbacks(callbacks.start);
-      };
-
-      recognition.onsoundstart = function() {
-        invokeCallbacks(callbacks.soundstart);
-      };
-
-      recognition.onerror = function(event) {
-        invokeCallbacks(callbacks.error, event);
-        switch (event.error) {
-          case 'network':
-            invokeCallbacks(callbacks.errorNetwork, event);
-            break;
-          case 'not-allowed':
-          case 'service-not-allowed':
-            // if permission to use the mic is denied, turn off auto-restart
-            autoRestart = false;
-            // determine if permission was denied by user or automatically.
-            if (new Date().getTime() - lastStartedAt < 200) {
-              invokeCallbacks(callbacks.errorPermissionBlocked, event);
-            } else {
-              invokeCallbacks(callbacks.errorPermissionDenied, event);
-            }
-            break;
-        }
-      };
-
-      recognition.onend = function() {
-        isListening = false;
-        invokeCallbacks(callbacks.end);
-        // annyang will auto restart if it is closed automatically and not by user action.
-        if (autoRestart) {
-          // play nicely with the browser, and never restart annyang automatically more than once per second
-          var timeSinceLastStart = new Date().getTime() - lastStartedAt;
-          autoRestartCount += 1;
-          if (autoRestartCount % 10 === 0) {
-            if (debugState) {
-              logMessage(
-                'Speech Recognition is repeatedly stopping and starting. See http://is.gd/annyang_restarts for tips.'
-              );
-            }
-          }
-          if (timeSinceLastStart < 1000) {
-            setTimeout(function() {
-              annyang.start({ paused: pauseListening });
-            }, 1000 - timeSinceLastStart);
-          } else {
-            annyang.start({ paused: pauseListening });
-          }
-        }
-      };
-
-      recognition.onresult = function(event) {
-        if (pauseListening) {
-          if (debugState) {
-            logMessage('Speech heard, but annyang is paused');
-          }
-          return false;
-        }
-
-        // Map the results to an array
-        var SpeechRecognitionResult = event.results[event.resultIndex];
-        var results = [];
-        for (let k = 0; k < SpeechRecognitionResult.length; k++) {
-          results[k] = SpeechRecognitionResult[k].transcript;
-        }
-
-        parseResults(results);
-      };
-
-      // build commands list
-      if (resetCommands) {
-        commandsList = [];
-      }
-      if (commands.length) {
-        this.addCommands(commands);
-      }
-    },
   };
 
   return annyang;
@@ -675,7 +675,7 @@
  * #### Examples:
  * ````html
  * <script>
- * const commands = {
+ * var commands = {
  *   // annyang will capture anything after a splat (*) and pass it to the function.
  *   // e.g. saying "Show me Batman and Robin" will call showFlickr('Batman and Robin');
  *   'show me *tag': showFlickr,
@@ -689,16 +689,16 @@
  *   'say hello (to my little) friend': greeting
  * };
  *
- * const showFlickr = function(tag) {
+ * var showFlickr = function(tag) {
  *   var url = 'http://api.flickr.com/services/rest/?tags='+tag;
  *   $.getJSON(url);
  * }
  *
- * const calculateStats = function(month) {
+ * var calculateStats = function(month) {
  *   $('#stats').text('Statistics for '+month);
  * }
  *
- * const greeting = function() {
+ * var greeting = function() {
  *   $('#greeting').text('Hello!');
  * }
  * </script>
@@ -713,8 +713,8 @@
  *
  * #### Examples:
  * ````javascript
- * const calculateFunction = function(month) { console.log(month); }
- * const commands = {
+ * var calculateFunction = function(month) { console.log(month); }
+ * var commands = {
  *   // This example will accept any word as the "month"
  *   'calculate :month stats': calculateFunction,
  *   // This example will only accept months which are at the start of a quarter

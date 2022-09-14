@@ -5,11 +5,15 @@
     <script src="/js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript">
         let myChatRoom = "";
+
         $(window).on('load', function () {
             getRoomList(); //전체 채팅방 리스트 가져오기
+
         });
+
         //전체 채팅방 리스트 가져오기
         function getRoomList() {
+
             //Ajax 호출
             $.ajax({
                 url: "/chat/roomList", // 채팅방 정보 가져올 URL
@@ -19,9 +23,11 @@
                 success: function (json) {
                     for (let i = 0; i < json.length; i++) {
                         $("#room_list").append(json[i] +"<br/>"); // 채팅방마다 한줄씩 추가
+
                     }
                 }
             })
+
         }
     </script>
     <title>채팅방 입장 및 채팅 리스트</title>
@@ -42,3 +48,4 @@
 
 </body>
 </html>
+

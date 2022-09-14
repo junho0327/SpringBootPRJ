@@ -115,7 +115,7 @@ public interface IMyRedisMapper {
      *
      * @param redisKey 가져올 RedisKey
      * @return 결과 값
-     */
+     */    
     Set<RedisDTO> getRedisSetJSONRamda(String redisKey) throws Exception;
 
     /**
@@ -141,7 +141,7 @@ public interface IMyRedisMapper {
      * @param redisKey 삭제할 RedisKey
      * @return 결과 값
      */
-    boolean deleteDataJson(String redisKey) throws Exception;
+    boolean deleteDataJSON(String redisKey) throws Exception;
 
     /**
      * Redis에 String 구조로 저장된 데이터 삭제하기

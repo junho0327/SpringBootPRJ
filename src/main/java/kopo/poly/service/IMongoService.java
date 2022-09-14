@@ -8,3 +8,4 @@ public interface IMongoService {
     void mongoTest() throws Exception;
 
 }
+

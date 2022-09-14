@@ -54,7 +54,7 @@ public interface IMyRedisService {
 
     /**
      * List타입에 JSON 형태로 저장된 데이터 가져오기
-     *
+     * 
      * 람다식 저장된 Redis키 값이 달라서 함수 별도로 만듬
      * 매퍼 호출은 앞서 만든 getRedisListJSON 호출함
      */
@@ -99,4 +99,5 @@ public interface IMyRedisService {
      * Redis에 String 구조로 저장된 데이터 삭제하기
      */
     boolean deleteDataString() throws Exception;
+
 }

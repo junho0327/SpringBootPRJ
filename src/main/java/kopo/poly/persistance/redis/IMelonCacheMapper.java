@@ -6,12 +6,11 @@ import java.util.List;
 
 public interface IMelonCacheMapper {
 
-    int insertSong(List<MelonDTO> pList) throws Exception;
-
     /**
      * 멜론 노래 리스트 저장하기
      *
      * @param pList 저장할 데이터
+     * @param redisKey 저장할 키
      * @return 저장 결과
      */
     int insertSong(List<MelonDTO> pList, String redisKey) throws Exception;
@@ -22,7 +21,7 @@ public interface IMelonCacheMapper {
      * @param key 저장된 키 이름
      * @return key존재여부
      */
-    boolean getExistKey(String key) throws Exception;
+    boolean getExistKey(String rediskey) throws Exception;
 
     /**
      * 오늘 수집된 멜론 노래리스트 가져오기
@@ -30,7 +29,6 @@ public interface IMelonCacheMapper {
      * @param key 저장된 키 이름
      * @return 노래 리스트
      */
-    List<MelonDTO> getSongList(String key) throws Exception;
-
+    List<MelonDTO> getSongList(String rediskey) throws Exception;
 
 }

@@ -30,13 +30,11 @@ public interface IMelonService {
 
     /**
      * 멜론 노래 리스트 한번에 저장하기
-     *
      */
     int collectMelonSongMany() throws Exception;
 
     /**
      * singer 필드의 값인 방탄소년단을 BTS로 변경하기
-     *
      */
     int updateBTSName() throws Exception;
 
@@ -46,18 +44,21 @@ public interface IMelonService {
      */
     int updateAddBTSNickname() throws Exception;
 
+    /**
+     * BTS 노래에 member 필드 추가하고,
+     * 그 member 필드에 BTS 멤버 이름들을 List로 저장하기
+     */
     int updateAddBTSMember() throws Exception;
 
     /**
      * BTS 노래에 member 필드 추가하고,
-     * 그 member 필드에 BTS 멤버 이름들을 LIST로 저장하기
+     * 그 member 필드에 BTS 멤버 이름들을 List로 저장하기
      */
     int updateManySong() throws Exception;
 
     /**
-     * 가수의 노래 삭제하기
+     * BTS 노래 삭제하기
      */
-    int deleteSong() throws Exception;
-
     int deleteBTSSong() throws Exception;
+
 }

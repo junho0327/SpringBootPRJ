@@ -23,11 +23,6 @@ public class MelonCacheMapper implements IMelonCacheMapper {
     }
 
     @Override
-    public int insertSong(List<MelonDTO> pList) throws Exception {
-        return 0;
-    }
-
-    @Override
     public int insertSong(List<MelonDTO> pList, String redisKey) throws Exception {
 
         log.info(this.getClass().getName() + ".insertSong Start!");
@@ -86,3 +81,4 @@ public class MelonCacheMapper implements IMelonCacheMapper {
         return rList;
     }
 }
+

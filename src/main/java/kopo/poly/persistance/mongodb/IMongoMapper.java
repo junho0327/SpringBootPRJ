@@ -13,3 +13,4 @@ public interface IMongoMapper {
      */
     int insertData(MongoDTO pDTO, String colNm) throws Exception;
 }
+

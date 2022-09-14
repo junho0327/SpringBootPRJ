@@ -451,7 +451,7 @@ public class MyRedisMapper implements IMyRedisMapper {
     }
 
     @Override
-    public boolean deleteDataJson(String redisKey) throws Exception {
+    public boolean deleteDataJSON(String redisKey) throws Exception {
 
         log.info(this.getClass().getName() + ".deleteDataJSON Start!");
 
@@ -461,29 +461,34 @@ public class MyRedisMapper implements IMyRedisMapper {
 
         boolean res = false;
 
-        if(redisDB.hasKey(redisKey)) {
+        if (redisDB.hasKey(redisKey)) {
             redisDB.delete(redisKey);
+
             res = true;
         }
+
         log.info(this.getClass().getName() + ".deleteDataJSON End!");
 
         return res;
     }
+
     @Override
     public boolean deleteDataString(String redisKey) throws Exception {
 
         log.info(this.getClass().getName() + ".deleteDataString Start!");
 
         // 저장되었던 데이터 타입 정의
-        redisDB.setKeySerializer(new StringRedisSerializer()); // String 타입
+        redisDB.setKeySerializer(new StringRedisSerializer());
         redisDB.setValueSerializer(new StringRedisSerializer());
 
         boolean res = false;
 
-        if(redisDB.hasKey(redisKey)) {
+        if (redisDB.hasKey(redisKey)) {
             redisDB.delete(redisKey);
+
             res = true;
         }
+
         log.info(this.getClass().getName() + ".deleteDataString End!");
 
         return res;

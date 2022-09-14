@@ -59,9 +59,9 @@ public class MyRedisService implements IMyRedisService {
 
         RedisDTO pDTO = new RedisDTO();
         pDTO.setTest_text("난 String타입에 JSON 구조로 저장할 일반 문자열이다.");
-        pDTO.setName("양준호");
+        pDTO.setName("이협건");
         pDTO.setAddr("서울");
-        pDTO.setEmail("2120110019@kopo.ac.kr");
+        pDTO.setEmail("hglee67@kopo.ac.kr");
 
         int res = myRedisMapper.saveRedisStringJSON(redisKey, pDTO);
 
@@ -144,9 +144,9 @@ public class MyRedisService implements IMyRedisService {
 
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
-            pDTO.setName("양준호[" + i + "]");
+            pDTO.setName("이협건[" + i + "]");
             pDTO.setAddr("서울");
-            pDTO.setEmail("2120110019@kopo.ac.kr");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pList.add(pDTO);
             pDTO = null;
@@ -190,9 +190,9 @@ public class MyRedisService implements IMyRedisService {
 
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
-            pDTO.setName("양준호[" + i + "]");
+            pDTO.setName("이협건[" + i + "]");
             pDTO.setAddr("서울");
-            pDTO.setEmail("2120110019@kopo.ac.kr");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pList.add(pDTO);
             pDTO = null;
@@ -232,9 +232,9 @@ public class MyRedisService implements IMyRedisService {
         String redisKey = "myRedis_Hash";
 
         RedisDTO pDTO = new RedisDTO();
-        pDTO.setName("양준호");
+        pDTO.setName("이협건");
         pDTO.setAddr("서울");
-        pDTO.setEmail("2120110019@kopo.ac.kr");
+        pDTO.setEmail("hglee67@kopo.ac.kr");
 
         int res = myRedisMapper.saveRedisHash(redisKey, pDTO);
 
@@ -274,9 +274,9 @@ public class MyRedisService implements IMyRedisService {
 
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
-            pDTO.setName("양준호[" + i + "]");
+            pDTO.setName("이협건[" + i + "]");
             pDTO.setAddr("서울");
-            pDTO.setEmail("2120110019@kopo.ac.kr");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pSet.add(pDTO);
             pDTO = null;
@@ -320,9 +320,9 @@ public class MyRedisService implements IMyRedisService {
 
             RedisDTO pDTO = new RedisDTO();
             pDTO.setTest_text(i + "번째 데이터입니다.");
-            pDTO.setName("양준호[" + i + "]");
+            pDTO.setName("이협건[" + i + "]");
             pDTO.setAddr("서울");
-            pDTO.setEmail("2120110019@kopo.ac.kr");
+            pDTO.setEmail("hglee67@kopo.ac.kr");
 
             pList.add(pDTO);
             pDTO = null;
@@ -357,13 +357,13 @@ public class MyRedisService implements IMyRedisService {
     @Override
     public boolean deleteDataJSON() throws Exception {
 
-        log.info(this.getClass().getName() + ".deleteData Start!");
+        log.info(this.getClass().getName() + ".deleteDate Start!");
 
         String redisKey = "myRedis_Zset_JSON";
 
-        boolean res = myRedisMapper.deleteDataJson(redisKey);
+        boolean res = myRedisMapper.deleteDataJSON(redisKey);
 
-        log.info(this.getClass().getName() + ".deleteData End!");
+        log.info(this.getClass().getName() + ".deleteDate End!");
 
         return res;
     }
@@ -371,13 +371,13 @@ public class MyRedisService implements IMyRedisService {
     @Override
     public boolean deleteDataString() throws Exception {
 
-        log.info(this.getClass().getName() + ".deleteData Start!");
+        log.info(this.getClass().getName() + ".deleteDataString Start!");
 
         String redisKey = "myRedis_Hash";
 
-        boolean res = myRedisMapper.deleteDataJson(redisKey);
+        boolean res = myRedisMapper.deleteDataJSON(redisKey);
 
-        log.info(this.getClass().getName() + ".deleteData End!");
+        log.info(this.getClass().getName() + ".deleteDataString End!");
 
         return res;
     }
